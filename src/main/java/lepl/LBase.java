@@ -1,6 +1,7 @@
 package lepl;
 
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -16,6 +17,8 @@ import javafx.stage.*;
 
 public class LBase extends VBox {
     //필드
+    private Stage primaryStage = null;
+
     private final double titleHeight;
     public double getTitleHeight() {
         return titleHeight;
@@ -43,6 +46,10 @@ public class LBase extends VBox {
         isResizable = resizable;
     }
 
+    private int resizeMode = 0;
+    private double pressX;
+    private double pressWidth;
+
     private boolean isMaximizable = true;
     public boolean isMaximizable() {
         return isMaximizable;
@@ -51,6 +58,7 @@ public class LBase extends VBox {
         isMaximizable = maximizable;
         titleBar.getMaximizeButton().setDisable(!maximizable);
     }
+
     private boolean isCanHalve = true;
     public boolean isCanHalve() {
         return isCanHalve;
@@ -58,6 +66,8 @@ public class LBase extends VBox {
     public void setCanHalve(boolean canHalve) {
         isCanHalve = canHalve;
     }
+
+    private int halveSide = 0;
 
     private double smallestWidth = 150;
     public void setSmallestWidth(double smallestWidth) {
@@ -93,9 +103,96 @@ public class LBase extends VBox {
 
         getChildren().add(titleBar = new LTitleBar(this));
         getChildren().add(mainPane = new LPane(this, Constant.PATH_IMAGE_FRAME + "background.png"));
+
+        setOnMousePressed(event -> {
+            pressX = getStage().getX();
+            pressWidth = getStage().getWidth();
+        });
+        setOnMouseMoved(event -> {
+            if (isResizable) {
+                double rp = 3;
+                double stageWidth = getStage().getWidth();
+                double stageHeight = getStage().getHeight();
+                if (!isMaximized) {
+                    if (isHalved) {
+                        if (event.getSceneX() >= (stageWidth - rp) && halveSide == 0) {
+                            setCursor(Cursor.E_RESIZE);
+                            resizeMode = 6;
+                        }
+                        else if (event.getSceneX() <= rp && halveSide == 1) {
+                            setCursor(Cursor.W_RESIZE);
+                            resizeMode = 7;
+                        }
+                        else {
+                            setCursor(Cursor.DEFAULT);
+                            resizeMode = 0;
+                        }
+                    } else {
+                        if (event.getSceneY() >= (stageHeight - rp)) {
+                            if (event.getX() <= rp) {
+                                setCursor(Cursor.SW_RESIZE);
+                                resizeMode = 4;
+                                return;
+                            }
+                            else if (event.getSceneX() >= (stageWidth - rp)) {
+                                setCursor(Cursor.SE_RESIZE);
+                                resizeMode = 5;
+                                return;
+                            }
+                            setCursor(Cursor.S_RESIZE);
+                            resizeMode = 2;
+                        }
+                        else if (event.getSceneX() <= rp) {
+                            setCursor(Cursor.W_RESIZE);
+                            resizeMode = 1;
+                        }
+                        else if (event.getSceneX() >= (stageWidth - rp)) {
+                            setCursor(Cursor.E_RESIZE);
+                            resizeMode = 3;
+                        }
+                        else {
+                            setCursor(Cursor.DEFAULT);
+                            resizeMode = 0;
+                        }
+                    }
+                }
+            }
+            else {
+                setCursor(Cursor.DEFAULT);
+                resizeMode = 0;
+            }
+        });
+        setOnMouseDragged(event -> {
+            switch (resizeMode) {
+                case 1 -> {
+                    getStage().setX(Math.min(event.getScreenX(), pressX + pressWidth - getSmallestWidth()));
+                    scale((pressX - event.getScreenX() + pressWidth) / getFirstSize().getWidth());
+                }
+                case 2 -> scale((event.getSceneY() - getTitleHeight()) / getFirstSize().getHeight());
+                case 3 -> scale(event.getSceneX() / getFirstSize().getWidth());
+                case 4 -> {
+                    getStage().setX(Math.min(
+                            ((pressX - event.getScreenX() + pressWidth) / getFirstSize().getWidth() > (event.getSceneY() - getTitleHeight()) / getFirstSize().getHeight() ? event.getScreenX() : pressX + pressWidth - getStage().getWidth()),
+                            pressX + pressWidth - getSmallestWidth()));
+                    scale(Math.max(
+                            (pressX - event.getScreenX() + pressWidth) / getFirstSize().getWidth(),
+                            (event.getSceneY() - getTitleHeight()) / getFirstSize().getHeight()
+                    ));
+                }
+                case 5 -> scale(Math.max(
+                        (event.getSceneY() - getTitleHeight()) / getFirstSize().getHeight(),
+                        event.getSceneX() / getFirstSize().getWidth()));
+                case 6 -> scaleDuringHalved(event.getScreenX());
+                case 7 -> {
+                    getStage().setX(Math.min(event.getScreenX(), Constant.SCREEN_SIZE.getWidth() - smallestWidth));
+                    scaleDuringHalved(Constant.SCREEN_SIZE.getWidth() - event.getScreenX());
+                }
+            }
+        });
     }
     public LBase(double width, double height, double titleHeight, BaseType baseType, Stage primaryStage) {
         this(width, height, titleHeight, baseType);
+        this.primaryStage = primaryStage;
         exitDialog = new LExitDialog();
     }
     public LBase(double width, double height) {
@@ -118,7 +215,11 @@ public class LBase extends VBox {
     }
 
     public Stage getStage() {
-        return (Stage) getScene().getWindow();
+        if (primaryStage == null) {
+            return (Stage) getScene().getWindow();
+        } else {
+            return primaryStage;
+        }
     }
 
     public boolean isMain() {
@@ -141,11 +242,17 @@ public class LBase extends VBox {
     }
 
     public void scale(double scale) {
-        scale = Math.max(scale, 150 / firstSize.getWidth());
+        scale = Math.max(scale, smallestWidth / firstSize.getWidth());
         mainPane.scale(scale);
         titleBar.setButtonWidth(firstSize.getWidth() * scale);
         getStage().setWidth(firstSize.getWidth() * scale);
         getStage().setHeight(firstSize.getHeight() * scale + titleHeight);
+    }
+    public void scaleDuringHalved(double width) {
+        width = Math.max(width, smallestWidth);
+        mainPane.scaleDuringHalved(width);
+        titleBar.setButtonWidth(width);
+        getStage().setWidth(width);
     }
 
     public void maximize() {
@@ -161,9 +268,10 @@ public class LBase extends VBox {
     }
     public void halve(int halveSide) {
         if (isCanHalve) {
+            this.halveSide = halveSide;
             isHalved = true;
             getStage().setY(0);
-            mainPane.halveScale();
+            mainPane.scaleDuringHalved(Constant.SCREEN_SIZE.getWidth() / 2);
             switch (halveSide) {
                 case 0 -> getStage().setX(0);
                 case 1 -> getStage().setX(Constant.SCREEN_SIZE.getWidth() / 2);
@@ -176,7 +284,7 @@ public class LBase extends VBox {
     public void normalize() {
         if (isMaximized) {
             mainPane.normalizeScale();
-            if (isHalved) mainPane.halveScale();
+            if (isHalved) mainPane.refreshHalveScale();
             isMaximized = false;
             getStage().setMaximized(false);
             titleBar.getMaximizeButton().setIcon(false);
