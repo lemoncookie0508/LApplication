@@ -1,5 +1,6 @@
 package lepl;
 
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
@@ -7,6 +8,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
+import javafx.stage.Screen;
 
 public class LPane extends AnchorPane {
     //필드
@@ -18,7 +20,6 @@ public class LPane extends AnchorPane {
     public double getScale() {
         return scale;
     }
-    private double scaleSave;
 
     private int resizeMode = 0;
 
@@ -26,6 +27,9 @@ public class LPane extends AnchorPane {
     private double pressWidth;
 
     private Translate maximizeTranslate = new Translate();
+    private Scale maximizeScale = new Scale();
+    private Translate halveTranslate = new Translate();
+    private Scale halveScale = new Scale();
 
     //생성자
     public LPane(LBase defend, String path) {
@@ -46,7 +50,7 @@ public class LPane extends AnchorPane {
             pressWidth = defend.getStage().getWidth();
         });
         setOnMouseMoved(event -> {
-            if (defend.isResizable() && !defend.isMaximized()) {
+            if (defend.isResizable() && !defend.isMaximized() && !defend.isHalved()) {
                 double rp = 3;
                 double width = defend.getStage().getWidth();
                 double height = defend.getStage().getHeight();
@@ -84,17 +88,13 @@ public class LPane extends AnchorPane {
         });
         setOnMouseDragged(event -> {
             switch (resizeMode) {
-                case 1:
+                case 1 -> {
                     defend.getStage().setX(Math.min(event.getScreenX(), pressX + pressWidth - defend.getSmallestWidth()));
                     defend.scale((pressX - event.getScreenX() + pressWidth) / defend.getFirstSize().getWidth());
-                    break;
-                case 2:
-                    defend.scale((event.getSceneY() - defend.getTitleHeight()) / defend.getFirstSize().getHeight());
-                    break;
-                case 3:
-                    defend.scale(event.getSceneX() / defend.getFirstSize().getWidth());
-                    break;
-                case 4:
+                }
+                case 2 -> defend.scale((event.getSceneY() - defend.getTitleHeight()) / defend.getFirstSize().getHeight());
+                case 3 -> defend.scale(event.getSceneX() / defend.getFirstSize().getWidth());
+                case 4 -> {
                     defend.getStage().setX(Math.min(
                             ((pressX - event.getScreenX() + pressWidth) / defend.getFirstSize().getWidth() > (event.getSceneY() - defend.getTitleHeight()) / defend.getFirstSize().getHeight() ? event.getScreenX() : pressX + pressWidth - defend.getStage().getWidth()),
                             pressX + pressWidth - defend.getSmallestWidth()));
@@ -102,12 +102,10 @@ public class LPane extends AnchorPane {
                             (pressX - event.getScreenX() + pressWidth) / defend.getFirstSize().getWidth(),
                             (event.getSceneY() - defend.getTitleHeight()) / defend.getFirstSize().getHeight()
                     ));
-                    break;
-                case 5:
-                    defend.scale(Math.max(
-                            (event.getSceneY() - defend.getTitleHeight()) / defend.getFirstSize().getHeight(),
-                            event.getSceneX() / defend.getFirstSize().getWidth()));
-                    break;
+                }
+                case 5 -> defend.scale(Math.max(
+                        (event.getSceneY() - defend.getTitleHeight()) / defend.getFirstSize().getHeight(),
+                        event.getSceneX() / defend.getFirstSize().getWidth()));
             }
         });
     }
@@ -126,18 +124,41 @@ public class LPane extends AnchorPane {
         this.scale = scale;
     }
     public void maximizeScale() {
-        scaleSave = this.scale;
+        if (defend.isHalved()) normalizeScale();
         if (defend.getFirstSize().getHeight() / defend.getFirstSize().getWidth() > (Constant.SCREEN_SIZE.getHeight() - defend.getTitleHeight()) / Constant.SCREEN_SIZE.getWidth()) {
-            scale((Constant.SCREEN_SIZE.getHeight() - defend.getTitleHeight()) / defend.getFirstSize().getHeight());
-            maximizeTranslate.setX(((Constant.SCREEN_SIZE.getWidth() - (defend.getFirstSize().getWidth() * scale)) / 2) / scale);
+            maximizeScale.setX(((Constant.SCREEN_SIZE.getHeight() - defend.getTitleHeight()) / defend.getFirstSize().getHeight()) / scale);
+            maximizeScale.setY(((Constant.SCREEN_SIZE.getHeight() - defend.getTitleHeight()) / defend.getFirstSize().getHeight()) / scale);
+            maximizeTranslate.setX(((Constant.SCREEN_SIZE.getWidth() - (defend.getFirstSize().getWidth() * (scale * maximizeScale.getX()))) / 2) / (scale * maximizeScale.getX()));
         } else {
-            scale(Constant.SCREEN_SIZE.getWidth() / defend.getFirstSize().getWidth());
-            maximizeTranslate.setY(((Constant.SCREEN_SIZE.getHeight() - defend.getTitleHeight() - defend.getFirstSize().getHeight() * scale) / 2) / scale);
+            maximizeScale.setX((Constant.SCREEN_SIZE.getWidth() / defend.getFirstSize().getWidth()) / scale);
+            maximizeScale.setY((Constant.SCREEN_SIZE.getWidth() / defend.getFirstSize().getWidth()) / scale);
+            maximizeTranslate.setY(((Constant.SCREEN_SIZE.getHeight() - defend.getTitleHeight() - defend.getFirstSize().getHeight() * (scale * maximizeScale.getX())) / 2) / (scale * maximizeScale.getX()));
         }
+        getTransforms().add(maximizeScale);
         getTransforms().add(maximizeTranslate);
     }
+    public void halveScale() {
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        if (defend.getFirstSize().getHeight() / defend.getFirstSize().getWidth() > (visualBounds.getHeight() - defend.getTitleHeight()) / (visualBounds.getWidth() / 2)) {
+            halveScale.setX(((visualBounds.getHeight() - defend.getTitleHeight()) / defend.getFirstSize().getHeight()) / scale);
+            halveScale.setY(((visualBounds.getHeight() - defend.getTitleHeight()) / defend.getFirstSize().getHeight()) / scale);
+            halveTranslate.setX((((visualBounds.getWidth() / 2) - (defend.getFirstSize().getWidth() * (scale * halveScale.getX()))) / 2) / (scale * halveScale.getX()));
+        } else {
+            halveScale.setX(((visualBounds.getWidth() / 2) / defend.getFirstSize().getWidth()) / scale);
+            halveScale.setY(((visualBounds.getWidth() / 2) / defend.getFirstSize().getWidth()) / scale);
+            halveTranslate.setY(((visualBounds.getHeight() - defend.getTitleHeight() - defend.getFirstSize().getHeight() * (scale * halveScale.getX())) / 2) / (scale * halveScale.getX()));
+        }
+        getTransforms().add(halveScale);
+        getTransforms().add(halveTranslate);
+    }
     public void normalizeScale() {
-        getTransforms().remove(maximizeTranslate);
-        scale(scaleSave);
+        if (defend.isMaximized()) {
+            getTransforms().remove(maximizeTranslate);
+            getTransforms().remove(maximizeScale);
+        }
+        if (defend.isHalved()) {
+            getTransforms().remove(halveTranslate);
+            getTransforms().remove(halveScale);
+        }
     }
 }

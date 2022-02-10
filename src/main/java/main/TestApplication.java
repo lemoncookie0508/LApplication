@@ -11,8 +11,8 @@ public class TestApplication extends LApplication {
     @Override
     public void start(Stage primaryStage) throws Exception {
         super.start(primaryStage);
-        LBase base = new LBase(960, 525, 20, new BaseType(BaseType.DEFAULT), primaryStage);
-        //LBase base = new LBase(400, 670, 20, new BaseType(BaseType.DEFAULT), true);
+        //LBase base = new LBase(960, 525, 20, new BaseType(BaseType.DEFAULT), primaryStage);
+        LBase base = new LBase(400, 670, 20, new BaseType(BaseType.DEFAULT), primaryStage);
         setIcon(primaryStage, base, new Image(Constant.PATH_IMAGE_FRAME + "appIcon.png"));
         setTitle(primaryStage, base, "LApplication");
         Scene scene = base.makeScene();

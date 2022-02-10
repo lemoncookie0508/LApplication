@@ -77,14 +77,25 @@ public class LTitleBar extends AnchorPane {
                 if (!defend.isMaximized() && event.getScreenY() <= 0) {
                     defend.maximize();
                 }
+            } else if (!defend.isMaximized() && event.getScreenX() <= 0) {
+                defend.halve(0);
+            } else if (!defend.isMaximized() && event.getScreenX() >= Constant.SCREEN_SIZE.getWidth() - 1) {
+                defend.halve(1);
             }
         });
         setOnMouseDragged(event -> {
             if (defend.isMaximized()) {
                 defend.normalize();
+                if (defend.isHalved()) defend.normalize();
                 defend.getStage().setX(event.getScreenX() - (event.getScreenX() * (defend.getStage().getWidth() - getButtonNumber() * defend.getTitleHeight()) / (Constant.SCREEN_SIZE.getWidth() - getButtonNumber() * defend.getTitleHeight())));
                 mouseX = event.getScreenX() - defend.getStage().getX();
-            } else {
+            } else if (defend.isHalved()) {
+                double widthSave = defend.getStage().getWidth();
+                defend.normalize();
+                defend.getStage().setX(defend.getStage().getX() + event.getSceneX() - (event.getSceneX() * (defend.getStage().getWidth() - getButtonNumber() * defend.getTitleHeight()) / (widthSave - getButtonNumber() * defend.getTitleHeight())));
+                mouseX = event.getScreenX() - defend.getStage().getX();
+            }
+            else {
                 defend.getStage().setX(event.getScreenX() - mouseX);
                 defend.getStage().setY(Math.min(event.getScreenY(), Screen.getPrimary().getVisualBounds().getHeight()) - mouseY);
             }

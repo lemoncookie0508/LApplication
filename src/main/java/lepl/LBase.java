@@ -51,6 +51,13 @@ public class LBase extends VBox {
         isMaximizable = maximizable;
         titleBar.getMaximizeButton().setDisable(!maximizable);
     }
+    private boolean isCanHalve = true;
+    public boolean isCanHalve() {
+        return isCanHalve;
+    }
+    public void setCanHalve(boolean canHalve) {
+        isCanHalve = canHalve;
+    }
 
     private double smallestWidth = 150;
     public void setSmallestWidth(double smallestWidth) {
@@ -63,6 +70,11 @@ public class LBase extends VBox {
     private boolean isMaximized = false;
     public boolean isMaximized() {
         return isMaximized;
+    }
+
+    private boolean isHalved = false;
+    public boolean isHalved() {
+        return isHalved;
     }
 
     private LTitleBar titleBar;
@@ -147,16 +159,36 @@ public class LBase extends VBox {
             getStage().setY(0);
         }
     }
+    public void halve(int halveSide) {
+        if (isCanHalve) {
+            isHalved = true;
+            getStage().setY(0);
+            mainPane.halveScale();
+            switch (halveSide) {
+                case 0 -> getStage().setX(0);
+                case 1 -> getStage().setX(Constant.SCREEN_SIZE.getWidth() / 2);
+            }
+            titleBar.setButtonWidth(Constant.SCREEN_SIZE.getWidth() / 2);
+            getStage().setWidth(Constant.SCREEN_SIZE.getWidth() / 2);
+            getStage().setHeight(Screen.getPrimary().getVisualBounds().getHeight());
+        }
+    }
     public void normalize() {
-        if (isMaximizable) {
-            isMaximized = false;
+        if (isMaximized) {
             mainPane.normalizeScale();
+            if (isHalved) mainPane.halveScale();
+            isMaximized = false;
             getStage().setMaximized(false);
             titleBar.getMaximizeButton().setIcon(false);
-            titleBar.setButtonWidth(getStage().getWidth());
-            if (getStage().getY() < 0) {
-                getStage().setY(0);
-            }
+        } else if (isHalved) {
+            mainPane.normalizeScale();
+            isHalved = false;
+            getStage().setWidth(mainPane.getScale() * firstSize.getWidth());
+            getStage().setHeight(mainPane.getScale() * firstSize.getHeight());
+        }
+        titleBar.setButtonWidth(getStage().getWidth());
+        if (getStage().getY() < 0) {
+            getStage().setY(0);
         }
     }
 
