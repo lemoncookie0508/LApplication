@@ -115,42 +115,46 @@ public class LBase extends VBox {
                 double stageHeight = getStage().getHeight();
                 if (!isMaximized) {
                     if (isHalved) {
-                        if (event.getSceneX() >= (stageWidth - rp) && halveSide == 0) {
-                            setCursor(Cursor.E_RESIZE);
-                            resizeMode = 6;
-                        }
-                        else if (event.getSceneX() <= rp && halveSide == 1) {
-                            setCursor(Cursor.W_RESIZE);
-                            resizeMode = 7;
-                        }
-                        else {
+                        if (event.getSceneY() > titleHeight) {
+                            if (event.getSceneX() >= (stageWidth - rp) && halveSide == 0) {
+                                setCursor(Cursor.E_RESIZE);
+                                resizeMode = 6;
+                            } else if (event.getSceneX() <= rp && halveSide == 1) {
+                                setCursor(Cursor.W_RESIZE);
+                                resizeMode = 7;
+                            } else {
+                                setCursor(Cursor.DEFAULT);
+                                resizeMode = 0;
+                            }
+                        } else {
                             setCursor(Cursor.DEFAULT);
                             resizeMode = 0;
                         }
                     } else {
-                        if (event.getSceneY() >= (stageHeight - rp)) {
-                            if (event.getX() <= rp) {
-                                setCursor(Cursor.SW_RESIZE);
-                                resizeMode = 4;
-                                return;
+                        if (event.getSceneY() > titleHeight) {
+                            if (event.getSceneY() >= (stageHeight - rp)) {
+                                if (event.getX() <= rp) {
+                                    setCursor(Cursor.SW_RESIZE);
+                                    resizeMode = 4;
+                                    return;
+                                } else if (event.getSceneX() >= (stageWidth - rp)) {
+                                    setCursor(Cursor.SE_RESIZE);
+                                    resizeMode = 5;
+                                    return;
+                                }
+                                setCursor(Cursor.S_RESIZE);
+                                resizeMode = 2;
+                            } else if (event.getSceneX() <= rp) {
+                                setCursor(Cursor.W_RESIZE);
+                                resizeMode = 1;
+                            } else if (event.getSceneX() >= (stageWidth - rp)) {
+                                setCursor(Cursor.E_RESIZE);
+                                resizeMode = 3;
+                            } else {
+                                setCursor(Cursor.DEFAULT);
+                                resizeMode = 0;
                             }
-                            else if (event.getSceneX() >= (stageWidth - rp)) {
-                                setCursor(Cursor.SE_RESIZE);
-                                resizeMode = 5;
-                                return;
-                            }
-                            setCursor(Cursor.S_RESIZE);
-                            resizeMode = 2;
-                        }
-                        else if (event.getSceneX() <= rp) {
-                            setCursor(Cursor.W_RESIZE);
-                            resizeMode = 1;
-                        }
-                        else if (event.getSceneX() >= (stageWidth - rp)) {
-                            setCursor(Cursor.E_RESIZE);
-                            resizeMode = 3;
-                        }
-                        else {
+                        } else {
                             setCursor(Cursor.DEFAULT);
                             resizeMode = 0;
                         }
