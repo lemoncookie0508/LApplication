@@ -114,8 +114,8 @@ public class LBase extends VBox {
                 double stageWidth = getStage().getWidth();
                 double stageHeight = getStage().getHeight();
                 if (!isMaximized) {
-                    if (isHalved) {
-                        if (event.getSceneY() > titleHeight) {
+                    if (event.getSceneY() > titleHeight) {
+                        if (isHalved) {
                             if (event.getSceneX() >= (stageWidth - rp) && halveSide == 0) {
                                 setCursor(Cursor.E_RESIZE);
                                 resizeMode = 6;
@@ -127,11 +127,6 @@ public class LBase extends VBox {
                                 resizeMode = 0;
                             }
                         } else {
-                            setCursor(Cursor.DEFAULT);
-                            resizeMode = 0;
-                        }
-                    } else {
-                        if (event.getSceneY() > titleHeight) {
                             if (event.getSceneY() >= (stageHeight - rp)) {
                                 if (event.getX() <= rp) {
                                     setCursor(Cursor.SW_RESIZE);
@@ -154,11 +149,14 @@ public class LBase extends VBox {
                                 setCursor(Cursor.DEFAULT);
                                 resizeMode = 0;
                             }
-                        } else {
-                            setCursor(Cursor.DEFAULT);
-                            resizeMode = 0;
                         }
+                    } else {
+                        setCursor(Cursor.DEFAULT);
+                        resizeMode = 0;
                     }
+                } else {
+                    setCursor(Cursor.DEFAULT);
+                    resizeMode = 0;
                 }
             }
             else {
@@ -167,29 +165,31 @@ public class LBase extends VBox {
             }
         });
         setOnMouseDragged(event -> {
-            switch (resizeMode) {
-                case 1 -> {
-                    getStage().setX(Math.min(event.getScreenX(), pressX + pressWidth - getSmallestWidth()));
-                    scale((pressX - event.getScreenX() + pressWidth) / getFirstSize().getWidth());
-                }
-                case 2 -> scale((event.getSceneY() - getTitleHeight()) / getFirstSize().getHeight());
-                case 3 -> scale(event.getSceneX() / getFirstSize().getWidth());
-                case 4 -> {
-                    getStage().setX(Math.min(
-                            ((pressX - event.getScreenX() + pressWidth) / getFirstSize().getWidth() > (event.getSceneY() - getTitleHeight()) / getFirstSize().getHeight() ? event.getScreenX() : pressX + pressWidth - getStage().getWidth()),
-                            pressX + pressWidth - getSmallestWidth()));
-                    scale(Math.max(
-                            (pressX - event.getScreenX() + pressWidth) / getFirstSize().getWidth(),
-                            (event.getSceneY() - getTitleHeight()) / getFirstSize().getHeight()
-                    ));
-                }
-                case 5 -> scale(Math.max(
-                        (event.getSceneY() - getTitleHeight()) / getFirstSize().getHeight(),
-                        event.getSceneX() / getFirstSize().getWidth()));
-                case 6 -> scaleDuringHalved(event.getScreenX());
-                case 7 -> {
-                    getStage().setX(Math.min(event.getScreenX(), Constant.SCREEN_SIZE.getWidth() - smallestWidth));
-                    scaleDuringHalved(Constant.SCREEN_SIZE.getWidth() - event.getScreenX());
+            if (isResizable && !isMaximized) {
+                switch (resizeMode) {
+                    case 1 -> {
+                        getStage().setX(Math.min(event.getScreenX(), pressX + pressWidth - getSmallestWidth()));
+                        scale((pressX - event.getScreenX() + pressWidth) / getFirstSize().getWidth());
+                    }
+                    case 2 -> scale((event.getSceneY() - getTitleHeight()) / getFirstSize().getHeight());
+                    case 3 -> scale(event.getSceneX() / getFirstSize().getWidth());
+                    case 4 -> {
+                        getStage().setX(Math.min(
+                                ((pressX - event.getScreenX() + pressWidth) / getFirstSize().getWidth() > (event.getSceneY() - getTitleHeight()) / getFirstSize().getHeight() ? event.getScreenX() : pressX + pressWidth - getStage().getWidth()),
+                                pressX + pressWidth - getSmallestWidth()));
+                        scale(Math.max(
+                                (pressX - event.getScreenX() + pressWidth) / getFirstSize().getWidth(),
+                                (event.getSceneY() - getTitleHeight()) / getFirstSize().getHeight()
+                        ));
+                    }
+                    case 5 -> scale(Math.max(
+                            (event.getSceneY() - getTitleHeight()) / getFirstSize().getHeight(),
+                            event.getSceneX() / getFirstSize().getWidth()));
+                    case 6 -> scaleDuringHalved(event.getScreenX());
+                    case 7 -> {
+                        getStage().setX(Math.min(event.getScreenX(), Constant.SCREEN_SIZE.getWidth() - smallestWidth));
+                        scaleDuringHalved(Constant.SCREEN_SIZE.getWidth() - event.getScreenX());
+                    }
                 }
             }
         });
@@ -212,6 +212,9 @@ public class LBase extends VBox {
     //메소드
     public boolean add(Node node) {
         return mainPane.add(node);
+    }
+    public boolean remove(Node node) {
+        return mainPane.remove(node);
     }
 
     public Scene makeScene() {
@@ -296,7 +299,7 @@ public class LBase extends VBox {
             mainPane.normalizeScale();
             isHalved = false;
             getStage().setWidth(mainPane.getScale() * firstSize.getWidth());
-            getStage().setHeight(mainPane.getScale() * firstSize.getHeight());
+            getStage().setHeight(mainPane.getScale() * firstSize.getHeight() + titleHeight);
         }
         titleBar.setButtonWidth(getStage().getWidth());
         if (getStage().getY() < 0) {

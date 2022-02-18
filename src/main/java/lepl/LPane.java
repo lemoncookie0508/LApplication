@@ -45,6 +45,9 @@ public class LPane extends AnchorPane {
     public boolean add(Node node) {
         return getChildren().add(node);
     }
+    public boolean remove(Node node) {
+        return getChildren().remove(node);
+    }
 
     public void setBackground(Image image) {
         background.setImage(image);
@@ -96,8 +99,8 @@ public class LPane extends AnchorPane {
             getTransforms().remove(maximizeScale);
         }
         if (defend.isHalved()) {
-            getTransforms().remove(halveTranslate);
             getTransforms().remove(halveScale);
+            getTransforms().remove(halveTranslate);
         }
     }
 }
