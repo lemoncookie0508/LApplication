@@ -148,6 +148,7 @@ public class LTitleBar extends AnchorPane {
         public LExitButton() {
             double titleHeight = defend.getTitleHeight();
             setPrefSize(titleHeight, titleHeight);
+            setFocusTraversable(false);
 
             Background basic = new Background(new BackgroundImage(
                     exitButtonBasicImage,
@@ -194,6 +195,7 @@ public class LTitleBar extends AnchorPane {
         public LMaximizeButton() {
             double titleHeight = defend.getTitleHeight();
             setPrefSize(titleHeight, titleHeight);
+            setFocusTraversable(false);
 
             basic = new Background(new BackgroundImage(
                     maximizeButtonBasicImage,
@@ -258,6 +260,7 @@ public class LTitleBar extends AnchorPane {
         public LMinimizeButton() {
             double titleHeight = defend.getTitleHeight();
             setPrefSize(titleHeight, titleHeight);
+            setFocusTraversable(false);
 
             Background basic = new Background(new BackgroundImage(
                     minimizeButtonBasicImage,

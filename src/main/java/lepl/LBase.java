@@ -5,8 +5,6 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -56,7 +54,7 @@ public class LBase extends VBox {
     }
     public void setMaximizable(boolean maximizable) {
         isMaximizable = maximizable;
-        titleBar.getMaximizeButton().setDisable(!maximizable);
+        if (isType(BaseType.MAXIMIZE)) titleBar.getMaximizeButton().setDisable(!maximizable);
     }
 
     private boolean isCanHalve = true;
@@ -88,6 +86,10 @@ public class LBase extends VBox {
     }
 
     private LTitleBar titleBar;
+    public void setTitleBar(LTitleBar titleBar) {
+        if (this.titleBar != null) getChildren().remove(this.titleBar);
+        getChildren().add(0, this.titleBar = titleBar);
+    }
     private LPane mainPane;
     private LExitDialog exitDialog;
 
@@ -101,7 +103,7 @@ public class LBase extends VBox {
         setHeight(height + titleHeight);
         setBackground(new Background(new BackgroundFill(Color.rgb(0, 0, 0), CornerRadii.EMPTY, Insets.EMPTY)));
 
-        getChildren().add(titleBar = new LTitleBar(this));
+        setTitleBar(new LTitleBar(this));
         getChildren().add(mainPane = new LPane(this, Constant.PATH_IMAGE_FRAME + "background.png"));
 
         setOnMousePressed(event -> {
@@ -266,7 +268,7 @@ public class LBase extends VBox {
         if (isMaximizable) {
             isMaximized = true;
             getStage().setMaximized(true);
-            titleBar.getMaximizeButton().setIcon(true);
+            if (isType(BaseType.MAXIMIZE)) titleBar.getMaximizeButton().setIcon(true);
             titleBar.setButtonWidth(Constant.SCREEN_SIZE.getWidth());
             mainPane.maximizeScale();
             getStage().setX(0);
@@ -294,7 +296,7 @@ public class LBase extends VBox {
             if (isHalved) mainPane.refreshHalveScale();
             isMaximized = false;
             getStage().setMaximized(false);
-            titleBar.getMaximizeButton().setIcon(false);
+            if (isType(BaseType.MAXIMIZE)) titleBar.getMaximizeButton().setIcon(false);
         } else if (isHalved) {
             mainPane.normalizeScale();
             isHalved = false;
