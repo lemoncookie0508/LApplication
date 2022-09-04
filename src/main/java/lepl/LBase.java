@@ -13,7 +13,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.*;
 
-public class LBase extends VBox {
+public class LBase extends AnchorPane {
     //필드
     private Stage primaryStage = null;
 
@@ -90,7 +90,14 @@ public class LBase extends VBox {
         if (this.titleBar != null) getChildren().remove(this.titleBar);
         getChildren().add(0, this.titleBar = titleBar);
     }
+    public LTitleBar getTitleBar() {
+        return titleBar;
+    }
+
     private LPane mainPane;
+    public LPane getMainPane() {
+        return mainPane;
+    }
     private LExitDialog exitDialog;
 
     //생성자
@@ -103,8 +110,8 @@ public class LBase extends VBox {
         setHeight(height + titleHeight);
         setBackground(new Background(new BackgroundFill(Color.rgb(0, 0, 0), CornerRadii.EMPTY, Insets.EMPTY)));
 
+        getChildren().add(mainPane = new LPane(this));
         setTitleBar(new LTitleBar(this));
-        getChildren().add(mainPane = new LPane(this, Constant.PATH_IMAGE_FRAME + "background.png"));
 
         setOnMousePressed(event -> {
             pressX = getStage().getX();
@@ -213,6 +220,7 @@ public class LBase extends VBox {
 
     //메소드
     public boolean add(Node node) {
+        titleBar.toFront();
         return mainPane.add(node);
     }
     public boolean remove(Node node) {
@@ -246,8 +254,8 @@ public class LBase extends VBox {
         titleBar.setTitle(title);
     }
 
-    public void setPaneBackground(Image image) {
-        mainPane.setBackground(image);
+    public void setPaneBackground(Background background) {
+        mainPane.setBackground(background);
     }
 
     public void scale(double scale) {
@@ -318,7 +326,12 @@ public class LBase extends VBox {
         }
     }
     public void exit() {
-        System.exit(0);
+        if (primaryStage == null) {
+            System.exit(0);
+        } else {
+            fireEvent(new WindowEvent(primaryStage, WindowEvent.WINDOW_CLOSE_REQUEST));
+            System.exit(0);
+        }
     }
 
     //중첩 클래스
@@ -364,7 +377,7 @@ public class LBase extends VBox {
         @Override
         public void show(Window window, double v, double v1) {
             super.show(window, v, v1);
-            yes.requestFocus();
+            no.requestFocus();
         }
     }
 }

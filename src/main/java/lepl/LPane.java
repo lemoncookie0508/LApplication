@@ -1,7 +1,6 @@
 package lepl;
 
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -14,8 +13,6 @@ public class LPane extends AnchorPane {
     //필드
     private LBase defend;
 
-    private ImageView background = new ImageView();
-
     private double scale = 1;
     public double getScale() {
         return scale;
@@ -27,18 +24,12 @@ public class LPane extends AnchorPane {
     private Scale halveScale = new Scale(1,1);
 
     //생성자
-    public LPane(LBase defend, String path) {
+    public LPane(LBase defend) {
         this.defend = defend;
-        this.background.setImage(new Image(path));
 
-        setPrefWidth(defend.getFirstSize().getWidth()) ;
+        setLayoutY(defend.getTitleHeight() + 1);
+        setPrefWidth(defend.getFirstSize().getWidth());
         setPrefHeight(defend.getFirstSize().getHeight());
-
-        background.setLayoutX(0);
-        background.setLayoutY(0);
-        background.setFitWidth(defend.getFirstSize().getWidth());
-        background.setFitHeight(defend.getFirstSize().getHeight());
-        add(background);
     }
 
     //메소드
@@ -47,10 +38,6 @@ public class LPane extends AnchorPane {
     }
     public boolean remove(Node node) {
         return getChildren().remove(node);
-    }
-
-    public void setBackground(Image image) {
-        background.setImage(image);
     }
 
     public void scale(double scale) {

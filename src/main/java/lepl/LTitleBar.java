@@ -43,7 +43,7 @@ public class LTitleBar extends AnchorPane {
         titleIcon.setLayoutY(1);
         add(titleIcon);
 
-        title.setFont(Font.loadFont(Constant.PATH_FONT + "CookieRun Bold.ttf", 13));
+        title.setFont(Font.loadFont(Constant.getResource("fonts/CookieRun Bold.ttf"), 13));
         title.setLayoutY(-0.5);
         title.setTextFill(Color.rgb(255, 255, 255));
         add(title);
@@ -140,9 +140,8 @@ public class LTitleBar extends AnchorPane {
 
     //중첩 클래스
     public class LExitButton extends Button {
-        //필드
-        private static final Image exitButtonBasicImage = new Image(Constant.PATH_IMAGE_FRAME + "exitButtonBasic.png");
-        private static final Image exitButtonEnteredImage = new Image(Constant.PATH_IMAGE_FRAME + "exitButtonEntered.png");
+        private static final Image exitButtonBasicImage = new Image(Constant.getImageResource("exitButtonBasic.png"));
+        private static final Image exitButtonEnteredImage = new Image(Constant.getImageResource("exitButtonEntered.png"));
 
         //생성자
         public LExitButton() {
@@ -183,10 +182,10 @@ public class LTitleBar extends AnchorPane {
 
     public class LMaximizeButton extends Button {
         //필드
-        private static final Image maximizeButtonBasicImage = new Image(Constant.PATH_IMAGE_FRAME + "maximizeButtonBasic.png");
-        private static final Image maximizeButtonEnteredImage = new Image(Constant.PATH_IMAGE_FRAME + "maximizeButtonEntered.png");
-        private static final Image maximizeButtonMaximizedBasicImage = new Image(Constant.PATH_IMAGE_FRAME + "maximizeButtonMaximizedBasic.png");
-        private static final Image maximizeButtonMaximizedEnteredImage = new Image(Constant.PATH_IMAGE_FRAME + "maximizeButtonMaximizedEntered.png");
+        private static final Image maximizeButtonBasicImage = new Image(Constant.getImageResource("maximizeButtonBasic.png"));
+        private static final Image maximizeButtonEnteredImage = new Image(Constant.getImageResource("maximizeButtonEntered.png"));
+        private static final Image maximizeButtonMaximizedBasicImage = new Image(Constant.getImageResource("maximizeButtonMaximizedBasic.png"));
+        private static final Image maximizeButtonMaximizedEnteredImage = new Image(Constant.getImageResource("maximizeButtonMaximizedEntered.png"));
 
         private final Background basic;
         private final Background basicMaximized;
@@ -253,8 +252,8 @@ public class LTitleBar extends AnchorPane {
 
     public class LMinimizeButton extends Button {
         //필드
-        private static final Image minimizeButtonBasicImage = new Image(Constant.PATH_IMAGE_FRAME + "minimizeButtonBasic.png");
-        private static final Image minimizeButtonEnteredImage = new Image(Constant.PATH_IMAGE_FRAME + "minimizeButtonEntered.png");
+        private static final Image minimizeButtonBasicImage = new Image(Constant.getImageResource("minimizeButtonBasic.png"));
+        private static final Image minimizeButtonEnteredImage = new Image(Constant.getImageResource("minimizeButtonEntered.png"));
 
         //생성자
         public LMinimizeButton() {
