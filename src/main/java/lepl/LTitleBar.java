@@ -7,6 +7,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -39,12 +41,11 @@ public class LTitleBar extends AnchorPane {
 
         titleIcon.setPreserveRatio(true);
         titleIcon.setSmooth(true);
-        titleIcon.setLayoutX(1);
+        titleIcon.setX(2);
         titleIcon.setLayoutY(1);
         add(titleIcon);
 
-        title.setFont(Font.loadFont(Constant.getResource("fonts/CookieRun Bold.ttf"), 13));
-        title.setLayoutY(-0.5);
+        title.setFont(Font.loadFont(Constant.getResource("fonts/NotoSansKR-Bold.otf"), 13));
         title.setTextFill(Color.rgb(255, 255, 255));
         add(title);
 
@@ -84,20 +85,22 @@ public class LTitleBar extends AnchorPane {
             }
         });
         setOnMouseDragged(event -> {
-            if (defend.isMaximized()) {
-                defend.normalize();
-                if (defend.isHalved()) defend.normalize();
-                defend.getStage().setX(event.getScreenX() - (event.getScreenX() * (defend.getStage().getWidth() - getButtonNumber() * defend.getTitleHeight()) / (Constant.SCREEN_SIZE.getWidth() - getButtonNumber() * defend.getTitleHeight())));
-                mouseX = event.getScreenX() - defend.getStage().getX();
-            } else if (defend.isHalved()) {
-                double widthSave = defend.getStage().getWidth();
-                defend.normalize();
-                defend.getStage().setX(defend.getStage().getX() + event.getSceneX() - (event.getSceneX() * (defend.getStage().getWidth() - getButtonNumber() * defend.getTitleHeight()) / (widthSave - getButtonNumber() * defend.getTitleHeight())));
-                mouseX = event.getScreenX() - defend.getStage().getX();
-            }
-            else {
-                defend.getStage().setX(event.getScreenX() - mouseX);
-                defend.getStage().setY(Math.min(event.getScreenY(), Screen.getPrimary().getVisualBounds().getHeight()) - mouseY);
+            if (event.getButton().equals(MouseButton.PRIMARY)) {
+                if (defend.isMaximized()) {
+                    defend.normalize();
+                    if (defend.isHalved()) defend.normalize();
+                    defend.getStage().setX(event.getScreenX() - (event.getScreenX() * (defend.getStage().getWidth() - getButtonNumber() * defend.getTitleHeight()) / (Constant.SCREEN_SIZE.getWidth() - getButtonNumber() * defend.getTitleHeight())));
+                    mouseX = event.getScreenX() - defend.getStage().getX();
+                } else if (defend.isHalved()) {
+                    double widthSave = defend.getStage().getWidth();
+                    defend.normalize();
+                    defend.getStage().setX(defend.getStage().getX() + event.getSceneX() - (event.getSceneX() * (defend.getStage().getWidth() - getButtonNumber() * defend.getTitleHeight()) / (widthSave - getButtonNumber() * defend.getTitleHeight())));
+                    mouseX = event.getScreenX() - defend.getStage().getX();
+                }
+                else {
+                    defend.getStage().setX(event.getScreenX() - mouseX);
+                    defend.getStage().setY(Math.min(event.getScreenY(), Screen.getPrimary().getVisualBounds().getHeight()) - mouseY);
+                }
             }
         });
     }
@@ -109,8 +112,8 @@ public class LTitleBar extends AnchorPane {
 
     public void setIcon(Image icon) {
         titleIcon.setImage(icon);
-        titleIcon.setFitHeight(defend.getTitleHeight());
-        title.setLayoutX(titleIcon.getImage().getWidth() * titleIcon.getFitHeight() / titleIcon.getImage().getHeight() + 5);
+        titleIcon.setFitHeight(defend.getTitleHeight()-0.5);
+        title.setLayoutX(titleIcon.getImage().getWidth() * titleIcon.getFitHeight() / titleIcon.getImage().getHeight() + 6);
     }
     public void setIcon(String url) {
         setIcon(new Image(url));
@@ -140,8 +143,10 @@ public class LTitleBar extends AnchorPane {
 
     //중첩 클래스
     public class LExitButton extends Button {
-        private static final Image exitButtonBasicImage = new Image(Constant.getImageResource("exitButtonBasic.png"));
-        private static final Image exitButtonEnteredImage = new Image(Constant.getImageResource("exitButtonEntered.png"));
+        private final Image exitButtonBasicImage = new Image(Constant.getImageResource("exitButtonBasic.png"));
+        private final Image exitButtonEnteredImage = new Image(Constant.getImageResource("exitButtonEntered.png"));
+        private final Background basic;
+        private final Background entered;
 
         //생성자
         public LExitButton() {
@@ -149,14 +154,14 @@ public class LTitleBar extends AnchorPane {
             setPrefSize(titleHeight, titleHeight);
             setFocusTraversable(false);
 
-            Background basic = new Background(new BackgroundImage(
+            basic = new Background(new BackgroundImage(
                     exitButtonBasicImage,
                     BackgroundRepeat.NO_REPEAT,
                     BackgroundRepeat.NO_REPEAT,
                     BackgroundPosition.CENTER,
                     new BackgroundSize(titleHeight, titleHeight, false, false, false, false)
             ));
-            Background entered = new Background(new BackgroundImage(
+            entered = new Background(new BackgroundImage(
                     exitButtonEnteredImage,
                     BackgroundRepeat.NO_REPEAT,
                     BackgroundRepeat.NO_REPEAT,
@@ -175,17 +180,21 @@ public class LTitleBar extends AnchorPane {
                 setCursor(Cursor.DEFAULT);
             });
             setOnAction(event -> {
-                defend.close();
+                if (defend.isMain()) {
+                    defend.closeRequest();
+                } else {
+                    defend.getStage().hide();
+                }
             });
         }
     }
 
     public class LMaximizeButton extends Button {
         //필드
-        private static final Image maximizeButtonBasicImage = new Image(Constant.getImageResource("maximizeButtonBasic.png"));
-        private static final Image maximizeButtonEnteredImage = new Image(Constant.getImageResource("maximizeButtonEntered.png"));
-        private static final Image maximizeButtonMaximizedBasicImage = new Image(Constant.getImageResource("maximizeButtonMaximizedBasic.png"));
-        private static final Image maximizeButtonMaximizedEnteredImage = new Image(Constant.getImageResource("maximizeButtonMaximizedEntered.png"));
+        private final Image maximizeButtonBasicImage = new Image(Constant.getImageResource("maximizeButtonBasic.png"));
+        private final Image maximizeButtonEnteredImage = new Image(Constant.getImageResource("maximizeButtonEntered.png"));
+        private final Image maximizeButtonMaximizedBasicImage = new Image(Constant.getImageResource("maximizeButtonMaximizedBasic.png"));
+        private final Image maximizeButtonMaximizedEnteredImage = new Image(Constant.getImageResource("maximizeButtonMaximizedEntered.png"));
 
         private final Background basic;
         private final Background basicMaximized;
@@ -252,8 +261,8 @@ public class LTitleBar extends AnchorPane {
 
     public class LMinimizeButton extends Button {
         //필드
-        private static final Image minimizeButtonBasicImage = new Image(Constant.getImageResource("minimizeButtonBasic.png"));
-        private static final Image minimizeButtonEnteredImage = new Image(Constant.getImageResource("minimizeButtonEntered.png"));
+        private final Image minimizeButtonBasicImage = new Image(Constant.getImageResource("minimizeButtonBasic.png"));
+        private final Image minimizeButtonEnteredImage = new Image(Constant.getImageResource("minimizeButtonEntered.png"));
 
         //생성자
         public LMinimizeButton() {

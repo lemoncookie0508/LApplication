@@ -1,14 +1,17 @@
 package lepl;
 
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.*;
@@ -174,7 +177,7 @@ public class LBase extends AnchorPane {
             }
         });
         setOnMouseDragged(event -> {
-            if (isResizable && !isMaximized) {
+            if (event.getButton().equals(MouseButton.PRIMARY) && isResizable && !isMaximized) {
                 switch (resizeMode) {
                     case 1 -> {
                         getStage().setX(Math.min(event.getScreenX(), pressX + pressWidth - getSmallestWidth()));
@@ -207,6 +210,11 @@ public class LBase extends AnchorPane {
         this(width, height, titleHeight, baseType);
         this.primaryStage = primaryStage;
         exitDialog = new LExitDialog();
+        EventHandler<WindowEvent> closeRequestHandler = windowEvent -> {
+            windowEvent.consume();
+            closeRequest();
+        };
+        primaryStage.setOnCloseRequest(closeRequestHandler);
     }
     public LBase(double width, double height) {
         this(width, height, 20, new BaseType(BaseType.DEFAULT));
@@ -216,6 +224,20 @@ public class LBase extends AnchorPane {
     }
     public LBase(double width, double height, BaseType baseType) {
         this(width, height, 20, baseType);
+    }
+
+    public void closeRequest() { //클로즈 리퀘스트 시. 이걸 바꿔야 함
+        showExitDialog();
+    }
+    public void exit() { //정말 끝내기
+        System.exit(0);
+    }
+
+    public final void showExitDialog() {
+        exitDialog.show(primaryStage,
+                (primaryStage.getWidth() - exitDialog.width) / 2 + primaryStage.getX(),
+                (primaryStage.getHeight() - exitDialog.height) / 2 + primaryStage.getY()
+        );
     }
 
     //메소드
@@ -317,23 +339,6 @@ public class LBase extends AnchorPane {
         }
     }
 
-    public void close() {
-        if (isMain()) {
-            Stage stage = getStage();
-            exitDialog.show(stage, (stage.getWidth() - exitDialog.width) / 2 + stage.getX(), (stage.getHeight() - exitDialog.height) / 2 + stage.getY());
-        } else {
-            getStage().hide();
-        }
-    }
-    public void exit() {
-        if (primaryStage == null) {
-            System.exit(0);
-        } else {
-            fireEvent(new WindowEvent(primaryStage, WindowEvent.WINDOW_CLOSE_REQUEST));
-            System.exit(0);
-        }
-    }
-
     //중첩 클래스
     private class LExitDialog extends Popup {
         //필드
@@ -353,19 +358,24 @@ public class LBase extends AnchorPane {
             pane.setBorder(new Border(new BorderStroke(Color.rgb(0,0,0), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))));
 
             message.setTextAlignment(TextAlignment.CENTER);
+            message.setFont(Font.loadFont(Constant.getResource("fonts/NotoSansKR-Regular.otf"), 14));
             message.setWrappingWidth(width);
             message.setLayoutX(0);
             message.setLayoutY(45);
+            yes.setFont(Font.loadFont(Constant.getResource("fonts/NotoSansKR-Regular.otf"), 12));
             yes.setLayoutX((double) 110 / 3);
             yes.setLayoutY(85);
             yes.setPrefWidth(65);
             yes.setPrefHeight(30);
-            yes.setOnAction(actionEvent -> exit());
+            yes.setOnAction(e -> {
+                exit();
+            });
+            no.setFont(Font.loadFont(Constant.getResource("fonts/NotoSansKR-Regular.otf"), 12));
             no.setLayoutX(((double) 110 / 3) * 2 + 65);
             no.setLayoutY(85);
             no.setPrefWidth(65);
             no.setPrefHeight(30);
-            no.setOnAction(actionEvent -> hide());
+            no.setOnAction(e -> hide());
 
             pane.getChildren().add(message);
             pane.getChildren().add(yes);
@@ -376,8 +386,8 @@ public class LBase extends AnchorPane {
         //함수
         @Override
         public void show(Window window, double v, double v1) {
-            super.show(window, v, v1);
             no.requestFocus();
+            super.show(window, v, v1);
         }
     }
 }
