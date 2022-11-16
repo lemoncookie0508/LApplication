@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class Registrar {
-    public static String getRegistryData(String regDir, String key, String datatype) {
+    public static String getRegData(String key, String name, String datatype) {
         BufferedInputStream in = null;
         String regData = "";
 
         try {
-            String strCmd = "reg query \"" + regDir + "\" /v \"" + key + "\"";
+            String strCmd = "reg query \"" + key + "\" /v \"" + name + "\"";
 
             Process process = Runtime.getRuntime().exec(strCmd);
             in = new BufferedInputStream(process.getInputStream());
@@ -38,7 +38,16 @@ public class Registrar {
 
         return regData.substring(regData.indexOf(datatype) + datatype.length()).trim();
     }
-    public static String getRegistryData(String regDir, String key) {
-        return getRegistryData(regDir, key, "REG_SZ");
+    public static String getRegData(String key, String name) {
+        return getRegData(key, name, "REG_SZ");
+    }
+
+    public static void addRegKey(String key, String name, String data) {
+        String cmd = "reg add \"" + key + "\" /v \"" + name + "\" /d \"" + data + "\" /f";
+        try {
+            Runtime.getRuntime().exec(cmd);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -7,6 +7,9 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -15,6 +18,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LBase extends AnchorPane {
     //필드
@@ -103,6 +109,11 @@ public class LBase extends AnchorPane {
     }
     private LExitDialog exitDialog;
 
+    protected HashMap<KeyCodeCombination, ShortcutHandler> keyboardShortcuts = new HashMap<>() {{
+        put(new KeyCodeCombination(KeyCode.W, KeyCombination.CONTROL_DOWN),
+                () -> fireEvent(new WindowEvent(getStage(), WindowEvent.WINDOW_CLOSE_REQUEST)));
+    }};
+
     //생성자
     public LBase(double width, double height, double titleHeight, BaseType baseType) {
         this.firstSize = new Rectangle(width, height);
@@ -112,6 +123,11 @@ public class LBase extends AnchorPane {
         setWidth(width);
         setHeight(height + titleHeight);
         setBackground(new Background(new BackgroundFill(Color.rgb(0, 0, 0), CornerRadii.EMPTY, Insets.EMPTY)));
+        setOnKeyPressed(e -> {
+            for (Map.Entry<KeyCodeCombination, ShortcutHandler> shortcut : keyboardShortcuts.entrySet()) {
+                if (shortcut.getKey().match(e)) shortcut.getValue().handle();
+            }
+        });
 
         getChildren().add(mainPane = new LPane(this));
         setTitleBar(new LTitleBar(this));
